@@ -23,7 +23,7 @@ namespace GomSu.Models
         public virtual DbSet<Voucher> Voucher { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseSqlServer("Server=THAITUANN\\SQLEXPRESS;Database=GOMSU;Trusted_Connection=True;TrustServerCertificate=True;");
+            => optionsBuilder.UseSqlServer("Data Source=DESKTOP-SC7J6G7\\NGHIADB;Initial Catalog=GOMSU;Integrated Security=True;Trust Server Certificate=True");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

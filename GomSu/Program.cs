@@ -14,6 +14,8 @@ Console.WriteLine($"Connection String: {connectionString ?? "Not found"}");
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<GOMSUContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
 
 var app = builder.Build();
 
@@ -33,6 +35,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=SanPham}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}");
 
 app.Run();
