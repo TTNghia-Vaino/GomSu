@@ -1,0 +1,40 @@
+﻿@model IEnumerable<GomSu.Models.SanPham>
+
+@{
+    ViewData["Title"] = "Danh Sách Sản Phẩm";
+}
+
+<h1>Danh Sách Sản Phẩm</h1>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="@item.HinhAnh" class="card-img-top" alt="@item.TenSP" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">@item.TenSP</h5>
+                    <p class="card-text">@string.Format("{0:N0}", item.Gia) VNĐ</p>
+                    <p class="card-text">Loại: @item.MaLoaiSPNavigation?.TenLoaiSP</p>
+                    <p class="card-text">Số lượng: @item.SoLuongTon</p>
+                    <a href="@Url.Action("Details", "SanPham", new { id = item.MaSP })" class="btn btn-primary">Xem chi tiết</a>
+                    <form asp-action="AddToCart" method="post" class="mt-2">
+                        <input type="hidden" name="maSP" value="@item.MaSP" />
+                        <input type="number" name="soLuong" value="1" min="1" max="@item.SoLuongTon" class="form-control d-inline w-25" />
+                        <button type="submit" class="btn btn-success">Thêm vào giỏ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+</style>

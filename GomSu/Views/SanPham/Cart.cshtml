@@ -1,0 +1,40 @@
+﻿@model IEnumerable<GomSu.Models.GioHang>
+
+@{
+    ViewData["Title"] = "Giỏ Hàng";
+}
+
+<h1>Giỏ Hàng</h1>
+
+@if (Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Sản Phẩm</th>
+                <th>Hình Ảnh</th>
+                <th>Số Lượng</th>
+                <th>Giá</th>
+                <th>Tổng</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.MaSPNavigation?.TenSP</td>
+                    <td><img src="@item.MaSPNavigation?.HinhAnh" alt="@item.MaSPNavigation?.TenSP" style="width: 50px;" /></td>
+                    <td>@item.SoLuong</td>
+                    <td>@string.Format("{0:N0}", item.Gia) VNĐ</td>
+                    <td>@string.Format("{0:N0}", item.SoLuong * item.Gia) VNĐ</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <a href="@Url.Action("Index", "SanPham")" class="btn btn-primary">Tiếp tục mua sắm</a>
+}
+else
+{
+    <p>Giỏ hàng của bạn đang trống.</p>
+    <a href="@Url.Action("Index", "SanPham")" class="btn btn-primary">Mua sắm ngay</a>
+}
