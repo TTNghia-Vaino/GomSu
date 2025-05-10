@@ -1,0 +1,29 @@
+﻿@model GomSu.ViewModels.DangKyModel
+<form id="registerForm" method="post" action="/Account/Register">
+    <div class="mb-3">
+        <label class="form-label">Họ tên</label>
+        <input asp-for="HoTen" class="form-control" />
+        <span asp-validation-for="HoTen" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Số điện thoại</label>
+        <input asp-for="SoDienThoai" class="form-control" />
+        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Tên đăng nhập</label>
+        <input asp-for="TenDangNhap" class="form-control" />
+        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mật khẩu</label>
+        <input asp-for="MatKhau" type="password" class="form-control" />
+        <span asp-validation-for="MatKhau" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-success">Tạo tài khoản</button>
+</form>

@@ -1,7 +1,7 @@
 ﻿@{
-    ViewData["Title"] = "Account";
+    ViewData["Title"] = "Tài khoản người dùng";
+    Layout = "_Layout";
 }
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 <div class="container mt-5">
@@ -9,62 +9,35 @@
 
     <ul class="nav nav-tabs" id="accountTab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Đăng nhập</button>
+            <button class="nav-link active" id="login-tab" type="button" onclick="loadTab('login')">Đăng nhập</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="forgot-tab" data-bs-toggle="tab" data-bs-target="#forgot" type="button" role="tab">Quên mật khẩu</button>
+            <button class="nav-link" id="forgot-tab" type="button" onclick="loadTab('forgot')">Quên mật khẩu</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Đăng ký</button>
+            <button class="nav-link" id="register-tab" type="button" onclick="loadTab('register')">Đăng ký</button>
         </li>
     </ul>
 
-    <div class="tab-content mt-4" id="accountTabContent">
-        <!-- Đăng nhập -->
-        <div class="tab-pane fade show active" id="login" role="tabpanel">
-            <form>
-                <div class="mb-3">
-                    <label for="loginUsername" class="form-label">Tên đăng nhập</label>
-                    <input type="text" class="form-control" id="loginUsername" placeholder="Nhập tên đăng nhập">
-                </div>
-                <div class="mb-3">
-                    <label for="loginPassword" class="form-label">Mật khẩu</label>
-                    <input type="password" class="form-control" id="loginPassword" placeholder="Nhập mật khẩu">
-                </div>
-                <button type="submit" class="btn btn-primary">Đăng nhập</button>
-            </form>
-        </div>
-
-        <!-- Quên mật khẩu -->
-        <div class="tab-pane fade" id="forgot" role="tabpanel">
-            <form>
-                <div class="mb-3">
-                    <label for="forgotEmail" class="form-label">Email khôi phục</label>
-                    <input type="email" class="form-control" id="forgotEmail" placeholder="Nhập email đã đăng ký">
-                </div>
-                <button type="submit" class="btn btn-warning">Gửi yêu cầu</button>
-            </form>
-        </div>
-
-        <!-- Đăng ký -->
-        <div class="tab-pane fade" id="register" role="tabpanel">
-            <form>
-                <div class="mb-3">
-                    <label for="registerUsername" class="form-label">Tên đăng nhập</label>
-                    <input type="text" class="form-control" id="registerUsername" placeholder="Nhập tên đăng nhập">
-                </div>
-                <div class="mb-3">
-                    <label for="registerEmail" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="registerEmail" placeholder="Nhập email">
-                </div>
-                <div class="mb-3">
-                    <label for="registerPassword" class="form-label">Mật khẩu</label>
-                    <input type="password" class="form-control" id="registerPassword" placeholder="Nhập mật khẩu">
-                </div>
-                <button type="submit" class="btn btn-success">Tạo tài khoản</button>
-            </form>
-        </div>
+    <div class="tab-content mt-4" id="tab-content">
+        <!-- Nội dung sẽ được load qua AJAX -->
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            loadTab('login');
+        });
+
+        function loadTab(tab) {
+            var url = '/' + tab;
+            $.get(url, function (data) {
+                $('#tab-content').html(data);
+            });
+        }
+
+        
+    </script>
+}

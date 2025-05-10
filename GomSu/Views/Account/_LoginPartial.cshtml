@@ -1,0 +1,15 @@
+﻿@model GomSu.ViewModels.DangNhapModel
+<form id="loginForm" method="post" action="/Account/Login">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-3">
+        <label class="form-label">Tên đăng nhập</label>
+        <input asp-for="TenDangNhap" class="form-control" />
+        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mật khẩu</label>
+        <input asp-for="MatKhau" type="password" class="form-control" />
+        <span asp-validation-for="MatKhau" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Đăng nhập</button>
+</form>

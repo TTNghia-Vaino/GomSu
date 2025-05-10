@@ -1,5 +1,10 @@
-﻿<!DOCTYPE html>
-<html lang="vi">
+﻿@{
+    var session = ViewContext.HttpContext.Session;
+    var maTk = session.GetString("MaTk");
+    var hoTen = session.GetString("HoTen");
+}
+
+<!DOCTYPE html>
 <style>
     .nav-link-hover::after {
         content: "";
@@ -21,6 +26,7 @@
         margin-top: 0; /* tránh nhảy */
     }
 </style>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -73,9 +79,18 @@
                     </div>
 
                     <!-- Nút đăng nhập màu xanh lá -->
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-success mb-2">
-                        Đăng nhập
-                    </a>
+
+                        @if (string.IsNullOrEmpty(maTk))
+                        {
+                            <a asp-controller="Account" asp-action="Index" class="btn btn-success me-2">Đăng nhập</a>
+                        }
+                        else
+                        {
+                            <span class="me-2">Xin chào, <strong>@hoTen, MaTK: @maTk</strong>!</span>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Đăng xuất</button>
+                            </form>
+                        }
 
                     <!-- Giỏ hàng có viền hình vuông, bo tròn cạnh -->
                     <a asp-controller="Shopping" asp-action="Cart"
