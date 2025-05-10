@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GomSu.Models
-{
-    public partial class Voucher
-    {
-        public Voucher()
-        {
-            DonHangs = new HashSet<DonHang>();
-        }
+namespace GomSu.Models;
 
-        public int MaVoucher { get; set; }
-        public string MaVoucherNavigation { get; set; } = null!;
-        public DateTime NgayBatDau { get; set; } // Add if exists
-        public DateTime NgayKetThuc { get; set; } // Add if exists
-        public virtual ICollection<DonHang> DonHangs { get; set; } // One-to-many with DonHang
-    }
+public partial class Voucher
+{
+    public string MaVoucher { get; set; } = null!;
+
+    public string? TenVoucher { get; set; }
+
+    public int? GiamGia { get; set; }
+
+    public DateOnly? NgayBatDau { get; set; }
+
+    public DateOnly? NgayKetThuc { get; set; }
+
+    public string? DieuKien { get; set; }
+
+    public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
 }

@@ -8,16 +8,16 @@
 
 <div class="row">
     <div class="col-md-6">
-        <img src="@Model.HinhAnh" class="img-fluid" alt="@Model.TenSP" style="max-height: 400px;">
+        <img src="@Model.HinhAnh" class="img-fluid" alt="@Model.TenSp" style="max-height: 400px;">
     </div>
     <div class="col-md-6">
-        <h2>@Model.TenSP</h2>
+        <h2>@Model.TenSp</h2>
         <p><strong>Giá:</strong> @string.Format("{0:N0}", Model.Gia) VNĐ</p>
-        <p><strong>Loại:</strong> @Model.MaLoaiSPNavigation?.TenLoaiSP</p>
+        <p><strong>Loại:</strong> @Model.MaLoaiSpNavigation?.TenLoaiSp</p>
         <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
         <p><strong>Mô tả:</strong> @Model.MoTa</p>
         <form asp-action="AddToCart" method="post" class="mb-3">
-            <input type="hidden" name="maSP" value="@Model.MaSP" />
+            <input type="hidden" name="maSP" value="@Model.MaSp" />
             <input type="number" name="soLuong" value="1" min="1" max="@Model.SoLuongTon" class="form-control d-inline w-25" />
             <button type="submit" class="btn btn-success">Thêm vào giỏ</button>
         </form>
@@ -32,7 +32,7 @@
     {
         <div class="card mb-2">
             <div class="card-body">
-                <p><strong>@(dg.MaTKNavigation?.HoTen ?? "Khách hàng ẩn danh")</strong> - @dg.SoSao sao - @(dg.NgayDanhGia?.ToString("dd/MM/yyyy") ?? "N/A")</p>
+                <p><strong>@(dg.MaTkNavigation?.HoTen ?? "Khách hàng ẩn danh")</strong> - @dg.SoSao sao - @(dg.NgayDanhGia?.ToString("dd/MM/yyyy") ?? "N/A")</p>
                 <p>@dg.NoiDung</p>
             </div>
         </div>

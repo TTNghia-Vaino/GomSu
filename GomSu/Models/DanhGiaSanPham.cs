@@ -1,33 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GomSu.Models
+namespace GomSu.Models;
+
+public partial class DanhGiaSanPham
 {
-    public partial class DanhGiaSanPham
-    {
-        [Key]
-        public int MaDanhGia { get; set; }
+    public int MaDanhGia { get; set; }
 
-        public int? MaSP { get; set; }
+    public int? MaSp { get; set; }
 
-        public int? MaTK { get; set; }
+    public int? MaTk { get; set; }
 
-        public int? SoSao { get; set; }
+    public int? SoSao { get; set; }
 
-        [StringLength(255)]
-        public string? NoiDung { get; set; }
+    public string? NoiDung { get; set; }
 
-        [Column(TypeName = "date")]
-        public DateTime? NgayDanhGia { get; set; }
+    public DateOnly? NgayDanhGia { get; set; }
 
-        [ForeignKey("MaSP")]
-        [InverseProperty("DanhGiaSanPhams")]
-        public virtual SanPham? MaSPNavigation { get; set; }
+    public virtual SanPham? MaSpNavigation { get; set; }
 
-        [ForeignKey("MaTK")]
-        [InverseProperty("DanhGiaSanPhams")]
-        public virtual TaiKhoan? MaTKNavigation { get; set; }
-    }
+    public virtual TaiKhoan? MaTkNavigation { get; set; }
 }

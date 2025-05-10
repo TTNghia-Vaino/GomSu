@@ -22,8 +22,8 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.MaSPNavigation?.TenSP</td>
-                    <td><img src="@item.MaSPNavigation?.HinhAnh" alt="@item.MaSPNavigation?.TenSP" style="width: 50px;" /></td>
+                    <td>@item.MaSpNavigation?.TenSp</td>
+                    <td><img src="@item.MaSpNavigation?.HinhAnh" alt="@item.MaSpNavigation?.TenSp" style="width: 50px;" /></td>
                     <td>@item.SoLuong</td>
                     <td>@string.Format("{0:N0}", item.Gia) VNĐ</td>
                     <td>@string.Format("{0:N0}", item.SoLuong * item.Gia) VNĐ</td>

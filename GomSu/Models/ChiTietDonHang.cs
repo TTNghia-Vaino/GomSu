@@ -1,23 +1,19 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
-namespace GomSu.Models
+namespace GomSu.Models;
+
+public partial class ChiTietDonHang
 {
-    public partial class ChiTietDonHang
-    {
-        public ChiTietDonHang()
-        {
-            // No navigation collections to initialize
-        }
+    public int MaDonHang { get; set; }
 
-        [Key]
-        public int MaDonHang { get; set; }
-        [Key]
-        public int MaSP { get; set; }
-        public int SoLuong { get; set; }
-        public decimal Gia { get; set; }
+    public int MaSp { get; set; }
 
-        public virtual DonHang? MaDonHangNavigation { get; set; }
-        public virtual SanPham? MaSanPhamNavigation { get; set; }
-    }
+    public int SoLuong { get; set; }
+
+    public int? Gia { get; set; }
+
+    public virtual DonHang MaDonHangNavigation { get; set; } = null!;
+
+    public virtual SanPham MaSpNavigation { get; set; } = null!;
 }

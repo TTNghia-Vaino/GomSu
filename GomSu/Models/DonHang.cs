@@ -1,24 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GomSu.Models
+namespace GomSu.Models;
+
+public partial class DonHang
 {
-    public partial class DonHang
-    {
-        public DonHang()
-        {
-            ChiTietDonHangs = new HashSet<ChiTietDonHang>();
-        }
+    public int MaDonHang { get; set; }
 
-        public int MaDonHang { get; set; }
-        public int MaKhachHang { get; set; }
-        public int? MaVoucher { get; set; }
-        public DateTime NgayDat { get; set; }
-        public decimal TongTien { get; set; }
-        public string TrangThai { get; set; } = null!;
+    public int? MaTk { get; set; }
 
-        public virtual TaiKhoan MaKhachHangNavigation { get; set; } = null!;
-        public virtual Voucher? MaVoucherNavigation { get; set; }
-        public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; }
-    }
+    public DateOnly? NgayDatHang { get; set; }
+
+    public int? TongTien { get; set; }
+
+    public string? TrangThai { get; set; }
+
+    public int? PhuongThucThanhToan { get; set; }
+
+    public int? TongTienVoucher { get; set; }
+
+    public string? MaVoucher { get; set; }
+
+    public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
+
+    public virtual TaiKhoan? MaTkNavigation { get; set; }
+
+    public virtual Voucher? MaVoucherNavigation { get; set; }
 }
