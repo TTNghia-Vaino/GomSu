@@ -16,7 +16,7 @@
         <p><strong>Loại:</strong> @Model.MaLoaiSpNavigation?.TenLoaiSp</p>
         <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
         <p><strong>Mô tả:</strong> @Model.MoTa</p>
-        <form asp-controller="GioHang" asp-action="AddToCart" method="post" class="mb-3">
+        <form asp-action="AddToCart" method="post" class="mb-3">
             <input type="hidden" name="maSP" value="@Model.MaSp" />
             <input type="number" name="soLuong" value="1" min="1" max="@Model.SoLuongTon" class="form-control d-inline w-25" />
             <button type="submit" class="btn btn-success">Thêm vào giỏ</button>

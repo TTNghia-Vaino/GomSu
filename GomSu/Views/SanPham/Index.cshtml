@@ -18,7 +18,7 @@
                     <p class="card-text">Loại: @item.MaLoaiSpNavigation?.TenLoaiSp</p>
                     <p class="card-text">Số lượng: @item.SoLuongTon</p>
                     <a href="@Url.Action("Details", "SanPham", new { id = item.MaSp })" class="btn btn-primary">Xem chi tiết</a>
-                    <form asp-controller="GioHang" asp-action="AddToCart" method="post" class="mt-2">
+                    <form asp-action="AddToCart" method="post" class="mt-2">
                         <input type="hidden" name="maSP" value="@item.MaSp" />
                         <input type="number" name="soLuong" value="1" min="1" max="@item.SoLuongTon" class="form-control d-inline w-25" />
                         <button type="submit" class="btn btn-success">Thêm vào giỏ</button>
