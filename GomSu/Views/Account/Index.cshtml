@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Tài khoản người dùng";
+    Layout = "_Layout";
+    var activeTab = ViewBag.ActiveTab ?? "login";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Tài khoản người dùng</h2>
+
+    <!-- THÔNG BÁO -->
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    else if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="accountTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="login-tab" type="button" onclick="loadTab('login')">Đăng nhập</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="forgot-tab" type="button" onclick="loadTab('forgot')">Quên mật khẩu</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="register-tab" type="button" onclick="loadTab('register')">Đăng ký</button>
+        </li>
+    </ul>
+
+    <div class="tab-content mt-4" id="tab-content">
+        <!-- nội dung tab load bằng jQuery -->
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function loadTab(tab) {
+            let tabMap = {
+                login: "Login",
+                register: "Register",
+                forgot: "ForgotPassword"
+            };
+            var url = '/Account/' + tabMap[tab];
+
+            $.get(url, function (data) {
+                $('#tab-content').html(data);
+
+                $('.nav-link').removeClass('active');
+                $('#' + tab + '-tab').addClass('active');
+            });
+        }
+
+        $(document).ready(function () {
+            var defaultTab = '@activeTab';
+            loadTab(defaultTab);
+        });
+    </script>
+}

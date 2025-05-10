@@ -1,5 +1,10 @@
-﻿<!DOCTYPE html>
-<html lang="vi">
+﻿@{
+    var session = ViewContext.HttpContext.Session;
+    var maTk = session.GetString("MaTk");
+    var hoTen = session.GetString("HoTen");
+}
+
+<!DOCTYPE html>
 <style>
     .nav-link-hover::after {
         content: "";
@@ -15,7 +20,13 @@
     .nav-link-hover:hover::after {
         width: 100%;
     }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0; /* tránh nhảy */
+    }
 </style>
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -68,9 +79,18 @@
                     </div>
 
                     <!-- Nút đăng nhập màu xanh lá -->
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-success mb-2">
-                        Đăng nhập
-                    </a>
+
+                        @if (string.IsNullOrEmpty(maTk))
+                        {
+                            <a asp-controller="Account" asp-action="Index" class="btn btn-success me-2">Đăng nhập</a>
+                        }
+                        else
+                        {
+                            <span class="me-2">Xin chào, <strong>@hoTen, MaTK: @maTk</strong>!</span>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">Đăng xuất</button>
+                            </form>
+                        }
 
                     <!-- Giỏ hàng có viền hình vuông, bo tròn cạnh -->
                     <a asp-controller="Shopping" asp-action="Cart"
@@ -96,18 +116,25 @@
     <nav class="bg-danger text-white py-2 shadow-sm">
         <div class="container d-flex justify-content-center align-items-center gap-4">
             <!-- Dropdown danh mục sản phẩm -->
+
             <div class="dropdown">
-                <a class="btn btn-outline-light fw-semibold dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <!-- Link chính: Bấm vào để xem toàn bộ sản phẩm -->
+                <a class="btn btn-outline-light fw-semibold dropdown-toggle"
+                   href="/SanPham/Index"
+                   role="button">
                     <i class="bi bi-list"></i> Danh mục sản phẩm
                 </a>
+
+                <!-- Menu xổ xuống: Rê chuột mới thấy -->
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-id="1">Bộ ấm chén</a></li>
-                    <li><a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-id="2">Lọ hoa</a></li>
-                    <li><a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-id="3">Tượng gốm</a></li>
-                    <li><a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-id="4">Đồ thờ</a></li>
-                    <li><a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-id="5">Quà tặng</a></li>
+                    <li><a class="dropdown-item" href="/SanPham/Index/1">Bộ ấm chén</a></li>
+                    <li><a class="dropdown-item" href="/SanPham/Index/2">Lọ hoa</a></li>
+                    <li><a class="dropdown-item" href="/SanPham/Index/3">Tượng gốm</a></li>
+                    <li><a class="dropdown-item" href="/SanPham/Index/4">Đồ thờ</a></li>
+                    <li><a class="dropdown-item" href="/SanPham/Index/5">Quà tặng</a></li>
                 </ul>
             </div>
+
 
             <!-- Các liên kết điều hướng -->
             <a class="text-white text-decoration-none fw-semibold position-relative nav-link-hover" asp-controller="Home" asp-action="Index">Trang chủ</a>
