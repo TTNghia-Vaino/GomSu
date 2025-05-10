@@ -6,9 +6,18 @@
 
 <h1>Giỏ Hàng</h1>
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 @if (Model.Any())
 {
-    <table class="table">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Sản Phẩm</th>
@@ -16,25 +25,57 @@
                 <th>Số Lượng</th>
                 <th>Giá</th>
                 <th>Tổng</th>
+                <th>Hành Động</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.MaSpNavigation?.TenSp</td>
-                    <td><img src="@item.MaSpNavigation?.HinhAnh" alt="@item.MaSpNavigation?.TenSp" style="width: 50px;" /></td>
-                    <td>@item.SoLuong</td>
+                    <td>@(item.MaSpNavigation?.TenSp ?? "Unknown Product")</td>
+                    <td>
+                        <img src="@(item.MaSpNavigation?.HinhAnh ?? "/images/placeholder.jpg")" alt="@(item.MaSpNavigation?.TenSp ?? "Image")" style="width: 50px; height: auto;" />
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <form asp-action="DecreaseQuantity" method="post" class="me-2">
+                                <input type="hidden" name="maSP" value="@item.MaSp" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
+                            </form>
+                            <span>@item.SoLuong</span>
+                            <form asp-action="IncreaseQuantity" method="post" class="ms-2">
+                                <input type="hidden" name="maSP" value="@item.MaSp" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                            </form>
+                        </div>
+                    </td>
                     <td>@string.Format("{0:N0}", item.Gia) VNĐ</td>
                     <td>@string.Format("{0:N0}", item.SoLuong * item.Gia) VNĐ</td>
+                    <td>
+                        <form asp-action="RemoveFromCart" method="post">
+                            <input type="hidden" name="maSP" value="@item.MaSp" />
+                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                        </form>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
-    <a href="@Url.Action("Index", "SanPham")" class="btn btn-primary">Tiếp tục mua sắm</a>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Tổng cộng: @string.Format("{0:N0}", Model.Sum(item => item.SoLuong * item.Gia)) VNĐ</h4>
+        <div>
+            <a href="@Url.Action("Index", "SanPham")" class="btn btn-primary">Tiếp tục mua sắm</a>
+            <a href="@Url.Action("Checkout", "DonHang")" class="btn btn-success">Thanh toán</a>
+        </div>
+    </div>
 }
 else
 {
     <p>Giỏ hàng của bạn đang trống.</p>
     <a href="@Url.Action("Index", "SanPham")" class="btn btn-primary">Mua sắm ngay</a>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 }
