@@ -24,60 +24,70 @@ namespace GomSu.Controllers
             int maKhachHang = GetCurrentUserId();
             if (maKhachHang == 0) return Unauthorized();
 
-            var sanPham = await _context.SanPhams.FindAsync(maSP);
-            if (sanPham == null)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                TempData["Error"] = "Sản phẩm không tồn tại.";
-                return RedirectToAction("Index", "SanPham");
-            }
-
-            var gioHang = await _context.GioHangs
-                .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
-
-            int requestedQuantity = soLuong ?? 1;
-            int currentQuantity = gioHang?.SoLuong ?? 0;
-            int newTotalQuantity = currentQuantity + requestedQuantity;
-
-            // Calculate true available quantity
-            int orderedQuantity = await _context.ChiTietDonHangs
-                .Where(c => c.MaSp == maSP && c.MaDonHangNavigation.TrangThai != "Hủy")
-                .SumAsync(c => (int?)c.SoLuong) ?? 0;
-
-            int otherUsersCartQuantity = await _context.GioHangs
-                .Where(g => g.MaSp == maSP && g.MaTk != maKhachHang)
-                .SumAsync(g => (int?)g.SoLuong) ?? 0;
-
-            int availableQuantity = (sanPham.SoLuongTon ?? 0) - (orderedQuantity + otherUsersCartQuantity);
-
-            // Log the values for debugging
-            Debug.WriteLine($"AddToCart - MaSP: {maSP}, SoLuongTon: {sanPham.SoLuongTon}, Ordered: {orderedQuantity}, OtherUsers: {otherUsersCartQuantity}, Available: {availableQuantity}, Requested: {newTotalQuantity}");
-
-            if (newTotalQuantity > availableQuantity)
-            {
-                TempData["Error"] = $"Số lượng vượt quá tồn kho! (Còn lại: {availableQuantity})";
-                return RedirectToAction("Index", "SanPham");
-            }
-
-            if (gioHang == null)
-            {
-                gioHang = new GioHang
+                try
                 {
-                    MaTk = maKhachHang,
-                    MaSp = maSP,
-                    SoLuong = requestedQuantity,
-                    Gia = sanPham.Gia ?? 0
-                };
-                _context.GioHangs.Add(gioHang);
-            }
-            else
-            {
-                gioHang.SoLuong = newTotalQuantity;
-                gioHang.Gia = sanPham.Gia ?? 0;
-            }
+                    var sanPham = await _context.SanPhams.FindAsync(maSP);
+                    if (sanPham == null)
+                    {
+                        TempData["Error"] = "Sản phẩm không tồn tại.";
+                        return RedirectToAction("Index", "SanPham");
+                    }
 
-            await _context.SaveChangesAsync();
-            TempData["Success"] = "Thêm vào giỏ hàng thành công!";
-            return RedirectToAction("Cart");
+                    var gioHang = await _context.GioHangs
+                        .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
+
+                    int requestedQuantity = soLuong ?? 1;
+                    int currentQuantity = gioHang?.SoLuong ?? 0;
+                    int newTotalQuantity = currentQuantity + requestedQuantity;
+
+                    // Calculate available quantity based on SoLuongTon and current cart quantity
+                    int availableQuantity = sanPham.SoLuongTon ?? 0;
+
+                    // Log the values for debugging
+                    Debug.WriteLine($"AddToCart - MaSP: {maSP}, SoLuongTon: {sanPham.SoLuongTon}, Available: {availableQuantity}, Current: {currentQuantity}, Requested: {newTotalQuantity}");
+
+                    if (newTotalQuantity > availableQuantity)
+                    {
+                        TempData["Error"] = $"Số lượng vượt quá tồn kho! (Còn lại: {availableQuantity})";
+                        return RedirectToAction("Index", "SanPham");
+                    }
+
+                    if (gioHang == null)
+                    {
+                        gioHang = new GioHang
+                        {
+                            MaTk = maKhachHang,
+                            MaSp = maSP,
+                            SoLuong = requestedQuantity,
+                            Gia = sanPham.Gia ?? 0
+                        };
+                        _context.GioHangs.Add(gioHang);
+                    }
+                    else
+                    {
+                        gioHang.SoLuong = newTotalQuantity;
+                        gioHang.Gia = sanPham.Gia ?? 0;
+                    }
+
+                    // Reduce SoLuongTon
+                    sanPham.SoLuongTon -= requestedQuantity;
+                    if (sanPham.SoLuongTon < 0) sanPham.SoLuongTon = 0;
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    TempData["Success"] = "Thêm vào giỏ hàng thành công!";
+                    return RedirectToAction("Cart");
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Có lỗi xảy ra khi thêm vào giỏ hàng.";
+                    return RedirectToAction("Index", "SanPham");
+                }
+            }
         }
 
         // GET: GioHang/Cart
@@ -91,7 +101,7 @@ namespace GomSu.Controllers
                 .Where(g => g.MaTk == maKhachHang)
                 .ToListAsync();
 
-            // Calculate available quantities for each product
+            // Calculate available quantities for each product using SoLuongTon directly
             var availableQuantities = new Dictionary<int, int>();
             foreach (var item in gioHang)
             {
@@ -101,19 +111,11 @@ namespace GomSu.Controllers
                     return RedirectToAction("Index", "SanPham");
                 }
 
-                int orderedQuantity = await _context.ChiTietDonHangs
-                    .Where(c => c.MaSp == item.MaSp && c.MaDonHangNavigation.TrangThai != "Hủy")
-                    .SumAsync(c => (int?)c.SoLuong) ?? 0;
-
-                int otherUsersCartQuantity = await _context.GioHangs
-                    .Where(g => g.MaSp == item.MaSp && g.MaTk != maKhachHang)
-                    .SumAsync(g => (int?)g.SoLuong) ?? 0;
-
-                int availableQuantity = (item.MaSpNavigation.SoLuongTon ?? 0) - (orderedQuantity + otherUsersCartQuantity);
+                int availableQuantity = item.MaSpNavigation.SoLuongTon ?? 0;
                 availableQuantities[item.MaSp] = availableQuantity;
 
                 // Log the values for debugging
-                Debug.WriteLine($"Cart - MaSP: {item.MaSp}, SoLuongTon: {item.MaSpNavigation.SoLuongTon}, Ordered: {orderedQuantity}, OtherUsers: {otherUsersCartQuantity}, Available: {availableQuantity}");
+                Debug.WriteLine($"Cart - MaSP: {item.MaSp}, SoLuongTon: {item.MaSpNavigation.SoLuongTon}, Available: {availableQuantity}");
             }
 
             ViewBag.AvailableQuantities = availableQuantities;
@@ -127,39 +129,46 @@ namespace GomSu.Controllers
             int maKhachHang = GetCurrentUserId();
             if (maKhachHang == 0) return Unauthorized();
 
-            var gioHang = await _context.GioHangs
-                .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
-            if (gioHang != null)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                var sanPham = await _context.SanPhams.FindAsync(maSP);
-                if (sanPham != null)
+                try
                 {
-                    int orderedQuantity = await _context.ChiTietDonHangs
-                        .Where(c => c.MaSp == maSP && c.MaDonHangNavigation.TrangThai != "Hủy")
-                        .SumAsync(c => (int?)c.SoLuong) ?? 0;
+                    var gioHang = await _context.GioHangs
+                        .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
+                    var sanPham = await _context.SanPhams.FindAsync(maSP);
 
-                    int otherUsersCartQuantity = await _context.GioHangs
-                        .Where(g => g.MaSp == maSP && g.MaTk != maKhachHang)
-                        .SumAsync(g => (int?)g.SoLuong) ?? 0;
-
-                    int availableQuantity = (sanPham.SoLuongTon ?? 0) - (orderedQuantity + otherUsersCartQuantity);
-
-                    // Log the values for debugging
-                    Debug.WriteLine($"IncreaseQuantity - MaSP: {maSP}, SoLuongTon: {sanPham.SoLuongTon}, Ordered: {orderedQuantity}, OtherUsers: {otherUsersCartQuantity}, Available: {availableQuantity}, NewQuantity: {gioHang.SoLuong + 1}");
-
-                    if (gioHang.SoLuong + 1 <= availableQuantity)
+                    if (gioHang != null && sanPham != null)
                     {
-                        gioHang.SoLuong++;
-                        await _context.SaveChangesAsync();
-                        TempData["Success"] = "Tăng số lượng thành công!";
+                        int currentQuantity = gioHang.SoLuong ?? 0;
+                        int availableQuantity = sanPham.SoLuongTon ?? 0;
+
+                        // Log the values for debugging
+                        Debug.WriteLine($"IncreaseQuantity - MaSP: {maSP}, SoLuongTon: {sanPham.SoLuongTon}, Available: {availableQuantity}, Current: {currentQuantity}, NewQuantity: {currentQuantity + 1}");
+
+                        if (currentQuantity + 1 <= availableQuantity)
+                        {
+                            gioHang.SoLuong++;
+                            sanPham.SoLuongTon -= 1;
+                            if (sanPham.SoLuongTon < 0) sanPham.SoLuongTon = 0;
+
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            TempData["Success"] = "Tăng số lượng thành công!";
+                        }
+                        else
+                        {
+                            TempData["Error"] = $"Số lượng tồn không đủ! (Còn lại: {availableQuantity})";
+                        }
                     }
-                    else
-                    {
-                        TempData["Error"] = $"Số lượng tồn không đủ! (Còn lại: {availableQuantity})";
-                    }
+                    return RedirectToAction("Cart");
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Có lỗi xảy ra khi tăng số lượng.";
+                    return RedirectToAction("Cart");
                 }
             }
-            return RedirectToAction("Cart");
         }
 
         // POST: GioHang/DecreaseQuantity
@@ -169,15 +178,32 @@ namespace GomSu.Controllers
             int maKhachHang = GetCurrentUserId();
             if (maKhachHang == 0) return Unauthorized();
 
-            var gioHang = await _context.GioHangs
-                .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
-            if (gioHang != null && gioHang.SoLuong > 1)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                gioHang.SoLuong--;
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Giảm số lượng thành công!";
+                try
+                {
+                    var gioHang = await _context.GioHangs
+                        .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
+                    var sanPham = await _context.SanPhams.FindAsync(maSP);
+
+                    if (gioHang != null && sanPham != null && gioHang.SoLuong > 1)
+                    {
+                        gioHang.SoLuong--;
+                        sanPham.SoLuongTon += 1;
+
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        TempData["Success"] = "Giảm số lượng thành công!";
+                    }
+                    return RedirectToAction("Cart");
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Có lỗi xảy ra khi giảm số lượng.";
+                    return RedirectToAction("Cart");
+                }
             }
-            return RedirectToAction("Cart");
         }
 
         // POST: GioHang/RemoveFromCart
@@ -187,15 +213,32 @@ namespace GomSu.Controllers
             int maKhachHang = GetCurrentUserId();
             if (maKhachHang == 0) return Unauthorized();
 
-            var gioHang = await _context.GioHangs
-                .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
-            if (gioHang != null)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                _context.GioHangs.Remove(gioHang);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Xóa sản phẩm khỏi giỏ hàng thành công!";
+                try
+                {
+                    var gioHang = await _context.GioHangs
+                        .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
+                    var sanPham = await _context.SanPhams.FindAsync(maSP);
+
+                    if (gioHang != null && sanPham != null)
+                    {
+                        sanPham.SoLuongTon += gioHang.SoLuong;
+                        _context.GioHangs.Remove(gioHang);
+
+                        await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        TempData["Success"] = "Xóa sản phẩm khỏi giỏ hàng thành công!";
+                    }
+                    return RedirectToAction("Cart");
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Có lỗi xảy ra khi xóa sản phẩm.";
+                    return RedirectToAction("Cart");
+                }
             }
-            return RedirectToAction("Cart");
         }
 
         // POST: GioHang/UpdateQuantity
@@ -205,40 +248,51 @@ namespace GomSu.Controllers
             int maKhachHang = GetCurrentUserId();
             if (maKhachHang == 0) return Unauthorized();
 
-            var gioHang = await _context.GioHangs
-                .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
-            var sanPham = await _context.SanPhams.FindAsync(maSP);
-
-            if (gioHang != null && sanPham != null)
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                int orderedQuantity = await _context.ChiTietDonHangs
-                    .Where(c => c.MaSp == maSP && c.MaDonHangNavigation.TrangThai != "Hủy")
-                    .SumAsync(c => (int?)c.SoLuong) ?? 0;
-
-                int otherUsersCartQuantity = await _context.GioHangs
-                    .Where(g => g.MaSp == maSP && g.MaTk != maKhachHang)
-                    .SumAsync(g => g.SoLuong) ?? 0;
-                int availableQuantity = (sanPham.SoLuongTon ?? 0) - (orderedQuantity + otherUsersCartQuantity);
-
-                // Log the values for debugging
-                Debug.WriteLine($"UpdateQuantity - MaSP: {maSP}, SoLuongTon: {sanPham.SoLuongTon}, Ordered: {orderedQuantity}, OtherUsers: {otherUsersCartQuantity}, Available: {availableQuantity}, Requested: {soLuong}");
-
-                if (soLuong > 0 && soLuong <= availableQuantity)
+                try
                 {
-                    gioHang.SoLuong = soLuong;
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Cập nhật số lượng thành công!";
+                    var gioHang = await _context.GioHangs
+                        .FirstOrDefaultAsync(g => g.MaTk == maKhachHang && g.MaSp == maSP);
+                    var sanPham = await _context.SanPhams.FindAsync(maSP);
+
+                    if (gioHang != null && sanPham != null)
+                    {
+                        int currentQuantity = gioHang.SoLuong ?? 0;
+                        int availableQuantity = sanPham.SoLuongTon ?? 0;
+
+                        // Log the values for debugging
+                        Debug.WriteLine($"UpdateQuantity - MaSP: {maSP}, SoLuongTon: {sanPham.SoLuongTon}, Available: {availableQuantity}, Current: {currentQuantity}, Requested: {soLuong}");
+
+                        if (soLuong > 0 && soLuong <= availableQuantity)
+                        {
+                            int quantityDifference = soLuong - currentQuantity;
+                            sanPham.SoLuongTon -= quantityDifference;
+                            if (sanPham.SoLuongTon < 0) sanPham.SoLuongTon = 0;
+
+                            gioHang.SoLuong = soLuong;
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            TempData["Success"] = "Cập nhật số lượng thành công!";
+                        }
+                        else
+                        {
+                            TempData["Error"] = $"Số lượng không hợp lệ hoặc vượt quá tồn kho! (Còn lại: {availableQuantity})";
+                        }
+                    }
+                    else
+                    {
+                        TempData["Error"] = "Sản phẩm không tồn tại trong giỏ hàng!";
+                    }
+                    return RedirectToAction("Cart");
                 }
-                else
+                catch
                 {
-                    TempData["Error"] = $"Số lượng không hợp lệ hoặc vượt quá tồn kho! (Còn lại: {availableQuantity})";
+                    await transaction.RollbackAsync();
+                    TempData["Error"] = "Có lỗi xảy ra khi cập nhật số lượng.";
+                    return RedirectToAction("Cart");
                 }
             }
-            else
-            {
-                TempData["Error"] = "Sản phẩm không tồn tại trong giỏ hàng!";
-            }
-            return RedirectToAction("Cart");
         }
 
         private int GetCurrentUserId()

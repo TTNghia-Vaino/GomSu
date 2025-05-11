@@ -38,6 +38,7 @@ namespace GomSu.Controllers
             }
 
             var sanPham = await _context.SanPhams
+                .AsNoTracking()
                 .Include(s => s.MaLoaiSpNavigation)
                 .Include(s => s.DanhGiaSanPhams)
                 .ThenInclude(d => d.MaTkNavigation)
@@ -47,6 +48,14 @@ namespace GomSu.Controllers
             {
                 return NotFound();
             }
+
+            // Calculate total quantity in all carts for this product
+            int totalCartQuantity = await _context.GioHangs
+                .Where(g => g.MaSp == id)
+                .SumAsync(g => g.SoLuong ?? 0);
+
+            int availableQuantity = (sanPham.SoLuongTon ?? 0) - totalCartQuantity;
+            ViewBag.AvailableQuantity = availableQuantity;
 
             return View(sanPham);
         }

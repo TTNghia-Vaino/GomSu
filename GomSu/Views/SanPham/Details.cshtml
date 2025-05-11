@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Chi Tiết Sản Phẩm";
+    int availableQuantity = ViewBag.AvailableQuantity ?? 0;
 }
 
 <h1>Chi Tiết Sản Phẩm</h1>
@@ -14,12 +15,20 @@
         <h2>@Model.TenSp</h2>
         <p><strong>Giá:</strong> @string.Format("{0:N0}", Model.Gia) VNĐ</p>
         <p><strong>Loại:</strong> @Model.MaLoaiSpNavigation?.TenLoaiSp</p>
-        <p><strong>Số lượng tồn:</strong> @Model.SoLuongTon</p>
+        <p><strong>Số lượng tồn:</strong> @availableQuantity</p>
         <p><strong>Mô tả:</strong> @Model.MoTa</p>
         <form asp-controller="GioHang" asp-action="AddToCart" method="post" class="mb-3">
             <input type="hidden" name="maSP" value="@Model.MaSp" />
-            <input type="number" name="soLuong" value="1" min="1" max="@Model.SoLuongTon" class="form-control d-inline w-25" />
-            <button type="submit" class="btn btn-success">Thêm vào giỏ</button>
+            <input type="number" name="soLuong" value="1" min="1" max="@availableQuantity" class="form-control d-inline w-25" />
+            @if (availableQuantity == 0)
+            {
+                <p class="text-danger">Hết hàng!</p>
+                <button type="submit" class="btn btn-success" disabled>Thêm vào giỏ</button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-success">Thêm vào giỏ</button>
+            }
         </form>
         <a href="@Url.Action("Index", "SanPham")" class="btn btn-secondary">Quay lại</a>
     </div>

@@ -44,7 +44,7 @@
                             </form>
                             <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
                                 <input type="hidden" name="maSP" value="@item.MaSp" />
-                                <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@(ViewBag.AvailableQuantities[item.MaSp])" class="form-control mx-2" style="width: 80px;" />
+                                <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@(ViewBag.AvailableQuantities[item.MaSp] + item.SoLuong)" class="form-control mx-2" style="width: 80px;" />
                                 <button type="submit" class="btn btn-sm btn-outline-success">Cập nhật</button>
                             </form>
                             <form asp-action="IncreaseQuantity" method="post" class="ms-2">
@@ -52,6 +52,14 @@
                                 <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
                             </form>
                         </div>
+                        @if (ViewBag.AvailableQuantities[item.MaSp] == 0)
+                        {
+                            <small class="text-danger">Số lượng tồn kho đã đầy! (Còn lại: @ViewBag.AvailableQuantities[item.MaSp])</small>
+                        }
+                        else
+                        {
+                            <small class="text-muted">Còn lại: @ViewBag.AvailableQuantities[item.MaSp]</small>
+                        }
                     </td>
                     <td>@string.Format("{0:N0}", item.Gia) VNĐ</td>
                     <td>@string.Format("{0:N0}", (item.SoLuong ?? 0) * (item.Gia ?? 0)) VNĐ</td>
