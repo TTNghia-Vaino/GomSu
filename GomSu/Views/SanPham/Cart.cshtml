@@ -42,7 +42,11 @@
                                 <input type="hidden" name="maSP" value="@item.MaSp" />
                                 <button type="submit" class="btn btn-sm btn-outline-secondary">-</button>
                             </form>
-                            <span>@item.SoLuong</span>
+                            <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
+                                <input type="hidden" name="maSP" value="@item.MaSp" />
+                                <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@(ViewBag.AvailableQuantities[item.MaSp])" class="form-control mx-2" style="width: 80px;" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">Cập nhật</button>
+                            </form>
                             <form asp-action="IncreaseQuantity" method="post" class="ms-2">
                                 <input type="hidden" name="maSP" value="@item.MaSp" />
                                 <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
@@ -50,7 +54,7 @@
                         </div>
                     </td>
                     <td>@string.Format("{0:N0}", item.Gia) VNĐ</td>
-                    <td>@string.Format("{0:N0}", item.SoLuong * item.Gia) VNĐ</td>
+                    <td>@string.Format("{0:N0}", (item.SoLuong ?? 0) * (item.Gia ?? 0)) VNĐ</td>
                     <td>
                         <form asp-action="RemoveFromCart" method="post">
                             <input type="hidden" name="maSP" value="@item.MaSp" />
@@ -63,7 +67,7 @@
     </table>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>Tổng cộng: @string.Format("{0:N0}", Model.Sum(item => item.SoLuong * item.Gia)) VNĐ</h4>
+        <h4>Tổng cộng: @string.Format("{0:N0}", Model.Sum(item => (item.SoLuong ?? 0) * (item.Gia ?? 0))) VNĐ</h4>
         <div>
             <a href="@Url.Action("Index", "SanPham")" class="btn btn-primary">Tiếp tục mua sắm</a>
             <a href="@Url.Action("Checkout", "DonHang")" class="btn btn-success">Thanh toán</a>
