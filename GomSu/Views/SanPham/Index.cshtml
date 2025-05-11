@@ -29,11 +29,11 @@
                     <h5 class="card-title">@item.TenSp</h5>
                     <p class="card-text">@string.Format("{0:N0}", item.Gia) VNĐ</p>
                     <p class="card-text">Loại: @(item.MaLoaiSpNavigation?.TenLoaiSp ?? "Không xác định")</p>
-                    <p class="card-text">Số lượng tồn: @item.SoLuongTon</p>
+                    <p class="card-text">Số lượng tồn: @(ViewBag.AvailableQuantities[item.MaSp])</p>
                     <a href="@Url.Action("Details", "SanPham", new { id = item.MaSp })" class="btn btn-primary">Xem chi tiết</a>
                     <form asp-controller="GioHang" asp-action="AddToCart" method="post" class="mt-2">
                         <input type="hidden" name="maSP" value="@item.MaSp" />
-                        <input type="number" name="soLuong" value="1" min="1" max="@item.SoLuongTon" required class="form-control d-inline w-25" />
+                        <input type="number" name="soLuong" value="1" min="1" max="@ViewBag.AvailableQuantities[item.MaSp]" required class="form-control d-inline w-25" />
                         <button type="submit" class="btn btn-success">Thêm vào giỏ</button>
                     </form>
                 </div>

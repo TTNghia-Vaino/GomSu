@@ -44,7 +44,7 @@
                             </form>
                             <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center">
                                 <input type="hidden" name="maSP" value="@item.MaSp" />
-                                <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@(ViewBag.AvailableQuantities[item.MaSp] + item.SoLuong)" class="form-control mx-2" style="width: 80px;" />
+                                <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@(ViewBag.AvailableQuantities[item.MaSp] + (item.SoLuong ?? 0))" class="form-control mx-2" style="width: 80px;" />
                                 <button type="submit" class="btn btn-sm btn-outline-success">Cập nhật</button>
                             </form>
                             <form asp-action="IncreaseQuantity" method="post" class="ms-2">

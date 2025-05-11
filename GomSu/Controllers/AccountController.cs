@@ -3,8 +3,8 @@ using GomSu.Services;
 using GomSu.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GomSu.Controllers
 {
@@ -12,6 +12,7 @@ namespace GomSu.Controllers
     {
         private readonly GomsuContext _context;
         private readonly EmailService _emailService;
+
         public AccountController(GomsuContext context, EmailService emailService)
         {
             _context = context;
@@ -21,7 +22,13 @@ namespace GomSu.Controllers
         // GET: /Account/
         public IActionResult Index()
         {
-            // Kiểm tra tab nào được chọn sau khi redirect (từ TempData)
+            // Kiểm tra nếu đã đăng nhập, chuyển hướng về trang chủ
+            var maTk = HttpContext.Session.GetString("MaTk");
+            if (!string.IsNullOrEmpty(maTk))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             ViewBag.ActiveTab = TempData["ActiveTab"] ?? "login";
             return View();
         }
@@ -30,6 +37,13 @@ namespace GomSu.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            // Kiểm tra nếu đã đăng nhập, không hiển thị form đăng nhập
+            var maTk = HttpContext.Session.GetString("MaTk");
+            if (!string.IsNullOrEmpty(maTk))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return PartialView("_LoginPartial", new DangNhapModel());
         }
 
@@ -49,22 +63,25 @@ namespace GomSu.Controllers
             if (user == null)
             {
                 TempData["Error"] = "Sai tên đăng nhập hoặc mật khẩu.";
-                TempData["ActiveTab"] = "login"; // Giữ lại tab
+                TempData["ActiveTab"] = "login";
                 return RedirectToAction("Index");
             }
+
             // Lưu thông tin vào HttpContext.Session
             HttpContext.Session.SetString("HoTen", user.HoTen);
-            HttpContext.Session.SetString("Quyen", user.Quyen.ToString()); 
-            HttpContext.Session.SetString("MaTk", user.MaTk.ToString()); 
+            HttpContext.Session.SetString("Quyen", user.Quyen.ToString());
+            HttpContext.Session.SetString("MaTk", user.MaTk.ToString());
             TempData["Message"] = "Đăng nhập thành công!";
-
             return RedirectToAction("Index", "Home");
         }
+
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            TempData["Message"] = "Đăng xuất thành công!";
             return RedirectToAction("Index", "Home");
         }
+
         // GET Forgot Password
         [HttpGet]
         public IActionResult ForgotPassword()
@@ -151,7 +168,7 @@ namespace GomSu.Controllers
                 SoDienThoai = model.SoDienThoai,
                 Email = model.Email,
                 TenDangNhap = model.TenDangNhap,
-                MatKhau = model.MatKhau, 
+                MatKhau = model.MatKhau,
                 NgayTao = DateOnly.FromDateTime(DateTime.Now),
                 Quyen = 0 // Gán quyền mặc định cho người dùng
             };

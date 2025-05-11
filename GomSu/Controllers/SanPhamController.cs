@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using GomSu.Models;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace GomSu.Controllers
 {
@@ -26,10 +29,20 @@ namespace GomSu.Controllers
                     .Where(s => s.MaLoaiSp == maLoaiSP)
                     .ToListAsync();
 
+            // Lấy trực tiếp SoLuongTon từ SanPham
+            var availableQuantities = new Dictionary<int, int>();
+            foreach (var item in sanPhams)
+            {
+                int availableQuantity = item.SoLuongTon ?? 0;
+                availableQuantities[item.MaSp] = availableQuantity > 0 ? availableQuantity : 0;
+            }
+            ViewBag.AvailableQuantities = availableQuantities;
+
             return View(sanPhams);
         }
 
         // GET: SanPham/Details/5
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -49,13 +62,9 @@ namespace GomSu.Controllers
                 return NotFound();
             }
 
-            // Calculate total quantity in all carts for this product
-            int totalCartQuantity = await _context.GioHangs
-                .Where(g => g.MaSp == id)
-                .SumAsync(g => g.SoLuong ?? 0);
-
-            int availableQuantity = (sanPham.SoLuongTon ?? 0) - totalCartQuantity;
-            ViewBag.AvailableQuantity = availableQuantity;
+            // Lấy trực tiếp SoLuongTon từ SanPham
+            int availableQuantity = sanPham.SoLuongTon ?? 0;
+            ViewBag.AvailableQuantity = availableQuantity > 0 ? availableQuantity : 0;
 
             return View(sanPham);
         }
