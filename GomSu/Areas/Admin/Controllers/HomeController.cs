@@ -16,11 +16,6 @@ namespace GomSu.Areas.Admin.Controllers
         [Area("Admin")]
         public IActionResult Index()
         {
-            var quyen = HttpContext.Session.GetString("Quyen");
-            if (string.IsNullOrEmpty(quyen) || quyen != "1")
-            {
-                return RedirectToAction("Index", "Home");   
-            }
 
             // Lấy thông tin tổng quan cho dashboard
             ViewBag.TongSanPham = _context.SanPhams.Count();
