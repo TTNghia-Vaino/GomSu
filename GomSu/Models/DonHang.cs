@@ -9,11 +9,13 @@ public partial class DonHang
 
     public int? MaTk { get; set; }
 
+    public string? DiaChi { get; set; }
+
     public DateOnly? NgayDatHang { get; set; }
 
     public int? TongTien { get; set; }
 
-    public string? TrangThai { get; set; }
+    public int? TrangThai { get; set; }
 
     public int? PhuongThucThanhToan { get; set; }
 
