@@ -5,7 +5,7 @@ namespace GomSu.Models;
 
 public partial class TaiKhoan
 {
-    public int MaTk { get; set; } // indentity (1,1)
+    public int MaTk { get; set; }
 
     public string? HoTen { get; set; }
 
