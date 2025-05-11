@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Tổng sản phẩm</h5>
+                <p class="card-text">@ViewBag.TongSanPham</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Tổng đơn hàng</h5>
+                <p class="card-text">@ViewBag.TongDonHang</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Tổng tài khoản</h5>
+                <p class="card-text">@ViewBag.TongTaiKhoan</p>
+            </div>
+        </div>
+    </div>
+    <!-- Có thể thêm thẻ thông tin khác ở đây -->
+</div>
+
+<!-- Thêm biểu đồ hoặc bảng thống kê nếu cần -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Đơn hàng gần đây
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái</th>
+                            <th>Tổng tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dữ liệu đơn hàng sẽ được hiển thị ở đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Sản phẩm bán chạy
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Đã bán</th>
+                            <th>Tồn kho</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dữ liệu sản phẩm sẽ được hiển thị ở đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Doanh thu theo tháng</h5>
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var ctx = document.getElementById('revenueChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: [1200000, 1900000, 3000000, 5000000, 2000000, 3000000, 4000000, 2500000, 3500000, 6000000, 4500000, 7000000],
+                        borderColor: '#dc3545',
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        });
+    </script>
+}
