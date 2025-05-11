@@ -1,7 +1,9 @@
 ﻿using GomSu.Models;
+using GomSu.Services;
 using GomSu.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Linq;
 
 namespace GomSu.Controllers
@@ -9,10 +11,11 @@ namespace GomSu.Controllers
     public class AccountController : Controller
     {
         private readonly GomsuContext _context;
-
-        public AccountController(GomsuContext context)
+        private readonly EmailService _emailService;
+        public AccountController(GomsuContext context, EmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: /Account/
@@ -71,7 +74,7 @@ namespace GomSu.Controllers
 
         // POST Forgot Password
         [HttpPost]
-        public IActionResult ForgotPassword(QuenMatKhauModel model)
+        public async Task<IActionResult> ForgotPassword(QuenMatKhauModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -79,9 +82,24 @@ namespace GomSu.Controllers
                 return View("Index", model);
             }
 
-            // TODO: xử lý quên mật khẩu
+            var user = _context.TaiKhoans.FirstOrDefault(t => t.Email == model.Email);
+            if (user == null)
+            {
+                TempData["Message"] = "Không tồn tại email.";
+                TempData["ActiveTab"] = "forgot";
+                return RedirectToAction("Index");
+            }
+
+            string currentPassword = user.MatKhau;
+            string subject = "Thông tin mật khẩu của bạn";
+            string body = $"Xin chào {user.HoTen},<br><br>"
+                        + "Mật khẩu hiện tại của bạn là: <strong>" + currentPassword + "</strong><br><br>"
+                        + "Trân trọng,<br>Gốm Sứ TOTY";
+
+            await _emailService.SendEmailAsync(model.Email, subject, body);
+
             TempData["Message"] = "Hướng dẫn khôi phục mật khẩu đã được gửi qua email.";
-            TempData["ActiveTab"] = "forgot"; // Giữ lại tab
+            TempData["ActiveTab"] = "forgot";
             return RedirectToAction("Index");
         }
 
@@ -94,7 +112,7 @@ namespace GomSu.Controllers
 
         // POST Register
         [HttpPost]
-        public IActionResult Register(DangKyModel model)
+        public async Task<IActionResult> Register(DangKyModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -102,9 +120,55 @@ namespace GomSu.Controllers
                 return View("Index", model);
             }
 
-            // TODO: xử lý đăng ký người dùng mới
+            var existingUser = _context.TaiKhoans.FirstOrDefault(u => u.TenDangNhap == model.TenDangNhap);
+            if (existingUser != null)
+            {
+                TempData["Message"] = "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.";
+                TempData["ActiveTab"] = "register";
+                return RedirectToAction("Index");
+            }
+
+            var existingEmail = _context.TaiKhoans.FirstOrDefault(u => u.Email == model.Email);
+            if (existingEmail != null)
+            {
+                TempData["Message"] = "Email đã được sử dụng.";
+                TempData["ActiveTab"] = "register";
+                return RedirectToAction("Index");
+            }
+
+            var existingPhone = _context.TaiKhoans.FirstOrDefault(u => u.SoDienThoai == model.SoDienThoai);
+            if (existingPhone != null)
+            {
+                TempData["Message"] = "Số điện thoại đã được sử dụng.";
+                TempData["ActiveTab"] = "register";
+                return RedirectToAction("Index");
+            }
+
+            // Tạo tài khoản mới
+            var newUser = new TaiKhoan
+            {
+                HoTen = model.HoTen,
+                SoDienThoai = model.SoDienThoai,
+                Email = model.Email,
+                TenDangNhap = model.TenDangNhap,
+                MatKhau = model.MatKhau, 
+                NgayTao = DateOnly.FromDateTime(DateTime.Now),
+                Quyen = 0 // Gán quyền mặc định cho người dùng
+            };
+
+            _context.TaiKhoans.Add(newUser);
+            _context.SaveChanges();
+            string subject = "Chào mừng bạn đến với Gốm Sứ TOTY";
+            string body = $"Xin chào {newUser.HoTen},<br><br>" +
+                          "Cảm ơn bạn đã đăng ký tài khoản tại <strong>Gốm Sứ TOTY</strong>.<br>" +
+                          $"Tên đăng nhập của bạn là: <strong>{newUser.TenDangNhap}</strong><br>" +
+                          $"Mật khẩu của bạn là: <strong>{newUser.MatKhau}</strong><br><br>" +
+                          "Trân trọng,<br>Gốm Sứ TOTY";
+
+            await _emailService.SendEmailAsync(newUser.Email, subject, body);
+
             TempData["Message"] = "Đăng ký thành công!";
-            TempData["ActiveTab"] = "register"; // Giữ lại tab
+            TempData["ActiveTab"] = "register";
             return RedirectToAction("Index");
         }
     }
