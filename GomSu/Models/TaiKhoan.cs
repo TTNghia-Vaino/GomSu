@@ -26,4 +26,6 @@ public partial class TaiKhoan
     public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
 
     public virtual ICollection<GioHang> GioHangs { get; set; } = new List<GioHang>();
+
+    public virtual ICollection<_2fa> _2fas { get; set; } = new List<_2fa>();
 }

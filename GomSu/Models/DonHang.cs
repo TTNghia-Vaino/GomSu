@@ -11,15 +11,15 @@ public partial class DonHang
 
     public string? DiaChi { get; set; }
 
-    public DateTime? NgayDatHang { get; set; } 
+    public DateOnly? NgayDatHang { get; set; }
 
-    public int? TongTien { get; set; }  
+    public int? TongTien { get; set; }
 
     public int? TrangThai { get; set; }
 
     public int? PhuongThucThanhToan { get; set; }
 
-    public int? TongTienVoucher { get; set; }  
+    public int? TongTienVoucher { get; set; }
 
     public string? MaVoucher { get; set; }
 
