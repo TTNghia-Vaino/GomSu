@@ -122,7 +122,7 @@ namespace GomSu.Controllers
                     {
                         MaTk = maKhachHang,
                         DiaChi = diaChi,
-                        NgayDatHang = System.DateTime.Now,
+                        NgayDatHang = DateOnly.FromDateTime(DateTime.Now),
                         TongTien = tongTien,
                         TrangThai = 1, // Chờ duyệt
                         PhuongThucThanhToan = phuongThucThanhToan.Value,

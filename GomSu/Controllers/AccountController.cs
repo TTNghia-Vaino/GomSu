@@ -160,10 +160,11 @@ namespace GomSu.Controllers
                 TempData["ActiveTab"] = "register";
                 return RedirectToAction("Index");
             }
-
+            int newMaTk = (_context.TaiKhoans.Max(tk => (int?)tk.MaTk) ?? 0) + 1;
             // Tạo tài khoản mới
             var newUser = new TaiKhoan
             {
+                MaTk = newMaTk,
                 HoTen = model.HoTen,
                 SoDienThoai = model.SoDienThoai,
                 Email = model.Email,
